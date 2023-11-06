@@ -97,9 +97,16 @@ variable "public_cidr" {
   description = "The IPv4 CIDR blocks for the public subnet of your OpenShift Cluster. The default value is 10.0.0.0/20. "
 }
 
+variable "create_openshift_compute_resources" {
+  type        = bool 
+  default     = true
+  description = "Specify whether compute resources should be created based on the provided OpenShift Image in Object Storage. If users set it to false, only network and IAM resources will be created through this Resource Manager stack."
+}
+
 variable "openshift_image_source_uri" {
   type        = string
-  description = "The OCI Object Storage URL for the OpenShift image. Before provisioning resources through this Resource Manager stack, users should upload the OpenShift image to OCI Object Storage, create a pre-authenticated requests (PAR) uri, and paste the uri to this block. For more detail regarding Object storage and PAR, please visit https://docs.oracle.com/en-us/iaas/Content/Object/Concepts/objectstorageoverview.htm and https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm ."
+  default     = ""
+  description = "The OCI Object Storage URL for the OpenShift image. Please leave it empty if you don't intend to create compute instances. Before provisioning resources through this Resource Manager stack, users should upload the OpenShift image to OCI Object Storage, create a pre-authenticated requests (PAR) uri, and paste the uri to this block. For more detail regarding Object storage and PAR, please visit https://docs.oracle.com/en-us/iaas/Content/Object/Concepts/objectstorageoverview.htm and https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm ."
 }
 
 #Provider
@@ -110,7 +117,6 @@ provider oci {
 locals {
   all_protocols = "all"
   anywhere      = "0.0.0.0/0"
-  create_openshift_instance_pools = true
 }
 
 data oci_identity_availability_domain availability_domain {
@@ -152,7 +158,7 @@ locals {
 }
 
 resource "oci_core_image" "openshift_image" {
-  count          = local.create_openshift_instance_pools ? 1 : 0
+  count          = var.create_openshift_compute_resources ? 1 : 0
   compartment_id = var.compartment_ocid
   display_name   = var.cluster_name
   launch_mode    = "PARAVIRTUALIZED"
@@ -166,21 +172,21 @@ resource "oci_core_image" "openshift_image" {
 }
 
 resource "oci_core_shape_management" "imaging_master_shape" {
-  count          = local.create_openshift_instance_pools ? 1 : 0
+  count          = var.create_openshift_compute_resources ? 1 : 0
   compartment_id = var.compartment_ocid
   image_id       = oci_core_image.openshift_image[0].id
   shape_name     = var.master_shape
 }
 
 resource "oci_core_shape_management" "imaging_worker_shape" {
-  count          = local.create_openshift_instance_pools ? 1 : 0
+  count          = var.create_openshift_compute_resources ? 1 : 0
   compartment_id = var.compartment_ocid
   image_id       = oci_core_image.openshift_image[0].id
   shape_name     = var.worker_shape
 }
 
 resource "oci_core_compute_image_capability_schema" "openshift_image_capability_schema" {
-  count                                               = local.create_openshift_instance_pools ? 1 : 0
+  count                                               = var.create_openshift_compute_resources ? 1 : 0
   compartment_id                                      = var.compartment_ocid
   compute_global_image_capability_schema_version_name = local.global_image_capability_schemas[0].current_version_name
   image_id                                            = oci_core_image.openshift_image[0].id
@@ -637,7 +643,7 @@ data "oci_dns_resolver" "dns_resolver" {
 }
 
 resource oci_core_instance_configuration master_node_config {
-  count          = local.create_openshift_instance_pools ? 1 : 0
+  count          = var.create_openshift_compute_resources ? 1 : 0
   compartment_id = var.compartment_ocid
   display_name   = "${var.cluster_name}-master"
   instance_details {
@@ -672,7 +678,7 @@ resource oci_core_instance_configuration master_node_config {
 }
 
 resource oci_core_instance_pool master_nodes {
-  count                     = local.create_openshift_instance_pools ? 1 : 0
+  count                     = var.create_openshift_compute_resources ? 1 : 0
   compartment_id            = var.compartment_ocid
   display_name              = "${var.cluster_name}-master"
   instance_configuration_id = oci_core_instance_configuration.master_node_config[0].id
@@ -708,7 +714,7 @@ resource oci_core_instance_pool master_nodes {
 }
 
 resource oci_core_instance_configuration worker_node_config {
-  count          = local.create_openshift_instance_pools ? 1 : 0
+  count          = var.create_openshift_compute_resources ? 1 : 0
   compartment_id = var.compartment_ocid
   display_name   = "${var.cluster_name}-worker"
   instance_details {
@@ -743,7 +749,7 @@ resource oci_core_instance_configuration worker_node_config {
 }
 
 resource oci_core_instance_pool worker_nodes {
-  count                     = local.create_openshift_instance_pools ? 1 : 0
+  count                     = var.create_openshift_compute_resources ? 1 : 0
   compartment_id            = var.compartment_ocid
   display_name              = "${var.cluster_name}-worker"
   instance_configuration_id = oci_core_instance_configuration.worker_node_config[0].id
