@@ -27,18 +27,19 @@ metadata:
 stringData:
   config.yaml: |
     useInstancePrincipals: true
-    compartment: $COMPARTMENT_ID
-    vcn: $OCP_VCN_ID
+    compartment: ocid1.compartment.oc1..aaaaaaaao75y3mduludmh3nlfydjjxaehirrs3wlsttj3hi5lfpedcyt37fq
+    vcn: ocid1.vcn.oc1.us-sanjose-1.amaaaaaa2bh44ryahmoivmid4hwp5g7pni3qmkv5nh4ibz3tr4xchpxhibpq
     loadBalancer:
-      subnet1: $OCP_SUBNET_ID
+      subnet1: ocid1.subnet.oc1.us-sanjose-1.aaaaaaaa3tbdvmcqy6tkjufhzrapp6byk3ajdnqfs5wqvf7lvhkkz3mrgmwa
       securityListManagementMode: Frontend
       securityLists:
-        $OCP_SUBNET_ID: $OPC_SEC_LIST_ID
+        ocid1.subnet.oc1.us-sanjose-1.aaaaaaaa3tbdvmcqy6tkjufhzrapp6byk3ajdnqfs5wqvf7lvhkkz3mrgmwa: ocid1.securitylist.oc1.us-sanjose-1.aaaaaaaau5u3hzoynj52rq6mozzn5mjbxlmk5opyrsdr32mvbh23ccixkhyq
     rateLimiter:
       rateLimitQPSRead: 20.0
       rateLimitBucketRead: 5
       rateLimitQPSWrite: 20.0
       rateLimitBucketWrite: 5
+
 ---
 
 # oci-csi-02-controller-driver.yaml

@@ -197,13 +197,13 @@ metadata:
 stringData:
   cloud-provider.yaml: |
     useInstancePrincipals: true
-    compartment: $COMPARTMENT_ID
-    vcn: $OCP_VCN_ID
+    compartment: ocid1.compartment.oc1..aaaaaaaao75y3mduludmh3nlfydjjxaehirrs3wlsttj3hi5lfpedcyt37fq
+    vcn: ocid1.vcn.oc1.us-sanjose-1.amaaaaaa2bh44ryahmoivmid4hwp5g7pni3qmkv5nh4ibz3tr4xchpxhibpq
     loadBalancer:
-      subnet1: $OCP_SUBNET_ID
+      subnet1: ocid1.subnet.oc1.us-sanjose-1.aaaaaaaa3tbdvmcqy6tkjufhzrapp6byk3ajdnqfs5wqvf7lvhkkz3mrgmwa
       securityListManagementMode: Frontend
       securityLists:
-        $OCP_SUBNET_ID: $OPC_SEC_LIST_ID
+        ocid1.subnet.oc1.us-sanjose-1.aaaaaaaa3tbdvmcqy6tkjufhzrapp6byk3ajdnqfs5wqvf7lvhkkz3mrgmwa: ocid1.securitylist.oc1.us-sanjose-1.aaaaaaaau5u3hzoynj52rq6mozzn5mjbxlmk5opyrsdr32mvbh23ccixkhyq
     rateLimiter:
       rateLimitQPSRead: 20.0
       rateLimitBucketRead: 5
@@ -262,7 +262,7 @@ spec:
             path: /etc/kubernetes
       containers:
         - name: oci-cloud-controller-manager
-          image: ghcr.io/oracle/cloud-provider-oci:v1.25.0
+          image: ghcr.io/davidfoster0127/cloud-provider-oci:v1.28.0-secondary-vnic
           command:
             - /bin/bash
             - -c
@@ -272,7 +272,7 @@ spec:
               if [[ -f /etc/kubernetes/apiserver-url.env ]]; then
                 source /etc/kubernetes/apiserver-url.env
               fi
-              exec /usr/local/bin/oci-cloud-controller-manager --cloud-config=/etc/oci/cloud-provider.yaml --cloud-provider=oci --leader-elect-resource-lock=configmapsleases --v=2
+              exec /usr/local/bin/oci-cloud-controller-manager --cloud-config=/etc/oci/cloud-provider.yaml --cloud-provider=oci --leader-elect-resource-lock=leases --v=2
           volumeMounts:
             - name: cfg
               mountPath: /etc/oci
